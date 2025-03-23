@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>AI.Tech - Login</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #e6e6e6;
+        }
+
+        .error-message {
+            color: #ff8a8a;
+            font-size: 80%;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 2rem;
+            border-radius: 10px;
+            color: #ffffff;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h2 {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            text-shadow: none;
+        }
+
+        .form-header p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: border-color 0.15s ease-in-out;
+            background: rgba(255, 255, 255, 0.1);
+            color: #000000;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            border: none;
+            padding: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .form-footer span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            color: #93c5fd;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .password-toggle:hover {
+            color: #60a5fa;
+        }
+
+        /* Remove the stars animation */
+        .stars {
+            display: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        /* Input placeholder color */
+        ::placeholder {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+        /* Update the main container background */
+        .bg-white {
+            background: transparent !important;
+        }
+
+        /* Adjust text colors for better contrast */
+        .text-dark {
+            color: #60a5fa !important;
+        }
+
+        /* Update navbar styles */
+        .navbar-brand h1 {
+            color: #ffffff;
+        }
+
+        .navbar-brand span {
+            color: #60a5fa !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars"></div>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+    <div class="container-fluid sticky-top">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark p-0">
+                <a href="index.html" class="navbar-brand">
+                    <h1 class="text-white">AI<span class="text-dark">.</span>Tech</h1>
+                </a>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+    <!-- Login Start -->
+    <div class="container-fluid pt-5 mb-5">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="rounded p-4 p-sm-5 wow fadeIn" data-wow-delay="0.1s">
+                        <!-- Sign In Form -->
+                        <div class="form-container sign-in">
+                            <div class="form-header">
+                                <h2>Welcome Back</h2>
+                                <p>Sign in to continue to your account</p>
+                            </div>
+                            <form id="loginForm">
+                                <div class="form-group">
+                                    <label for="loginEmail">Email Address</label>
+                                    <input type="email" class="form-control" id="loginEmail" placeholder="Enter your email" required>
+                                    <div class="error-message" id="loginEmailError"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="loginPassword">Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+                                        <i class="password-toggle fas fa-eye"></i>
+                                    </div>
+                                    <div class="error-message" id="loginPasswordError"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="loginRole">Role</label>
+                                    <input type="text" class="form-control" id="loginRole" readonly>
+                                </div>
+                                <div class="form-group mb-3" style="display: none;">
+                                    <input type="hidden" id="userRole" value="">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                            </form>
+                            <div class="form-footer">
+                                <span>Don't have an account? </span>
+                                <a href="#" id="showSignUp">Create Account</a>
+                            </div>
+                        </div>
+
+                        <!-- Sign Up Form -->
+                        <div class="form-container sign-up" style="display: none;">
+                            <div class="form-header">
+                                <h2>Create Account</h2>
+                                <p>Fill in your details to get started</p>
+                            </div>
+                            <form id="signupForm">
+                                <div class="form-group mb-3">
+                                    <label for="signupName">Full Name</label>
+                                    <input type="text" class="form-control" id="signupName" required>
+                                    <div class="error-message" id="signupNameError"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="signupEmail">Email</label>
+                                    <input type="email" class="form-control" id="signupEmail" required>
+                                    <div class="error-message" id="signupEmailError"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="signupPhone">Phone Number</label>
+                                    <input type="tel" class="form-control" id="signupPhone" pattern="[0-9]{10}" placeholder="Enter 10-digit number" required>
+                                    <div class="error-message" id="signupPhoneError"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="signupPassword">Password</label>
+                                    <input type="password" class="form-control" id="signupPassword" required>
+                                    <div class="error-message" id="signupPasswordError"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="confirmPassword">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirmPassword" required>
+                                    <div class="error-message" id="confirmPasswordError"></div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="signupRole">Role</label>
+                                    <input type="text" class="form-control" id="signupRole" readonly>
+                                </div>
+                                <div class="form-group mb-3" style="display: none;">
+                                    <input type="hidden" id="userRole" value="">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 py-3">Sign Up</button>
+                            </form>
+                            <div class="text-center mt-4">
+                                Already have an account? <a href="#" id="showSignIn" class="text-primary">Sign In</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Login End -->
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
+    <!-- Keep the existing Firebase configuration and event handlers -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRfEEw2-zyeN91zli2y5MK4QjY4Om3o6A",
+            authDomain: "kjsitalgo.firebaseapp.com",
+            projectId: "kjsitalgo",
+            storageBucket: "kjsitalgo.firebasestorage.app",
+            messagingSenderId: "1003312299685",
+            appId: "1:1003312299685:web:ef7e8b416fc7628147174c",
+            measurementId: "G-CE7SDSSK7R"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.querySelector('.container');
+            const signUpForm = document.querySelector('.form-container.sign-up');
+            const signInForm = document.querySelector('.form-container.sign-in');
+            const showSignUpBtn = document.getElementById('showSignUp');
+            const showSignInBtn = document.getElementById('showSignIn');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+
+            // Toggle between sign in and sign up forms
+            showSignUpBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                signInForm.style.display = 'none';
+                signUpForm.style.display = 'block';
+            });
+
+            showSignInBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                signUpForm.style.display = 'none';
+                signInForm.style.display = 'block';
+            });
+
+            // Function to determine role based on email domain
+            function determineRole(email) {
+                const domain = email.split('@')[1].toLowerCase();
+                switch (domain) {
+                    case 'somaiya.edu':
+                        return 'intern';
+                    case 'gmail.com':
+                        return 'project manager';
+                    case 'idfy.com':
+                        return 'founder';
+                    default:
+                        return 'user';
+                }
+            }
+
+            // Modify login form submission
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const role = determineRole(email);
+
+                if (!email || !password) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                // Set persistence to LOCAL before signing in
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .then(() => {
+                        // Firebase Authentication
+                        return auth.signInWithEmailAndPassword(email, password);
+                    })
+                    .then((userCredential) => {
+                        // Store user data in Firestore with role
+                        return db.collection('users').doc(userCredential.user.uid).set({
+                            email: email,
+                            role: role,
+                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    })
+                    .then(() => {
+                        // Store user info in localStorage instead of sessionStorage
+                        localStorage.setItem('userEmail', email);
+                        localStorage.setItem('userRole', role);
+                        
+                        // Ensure user is properly authenticated before redirect
+                        const user = auth.currentUser;
+                        if (user) {
+                            window.location.href = 'email.html';
+                        } else {
+                            throw new Error('Authentication failed');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Login error:', error);
+                        alert(error.message);
+                    });
+            });
+
+            // Modify signup form submission
+            signupForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const phone = document.getElementById('signupPhone').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const role = determineRole(email);
+
+                if (!name || !email || !phone || !password || !confirmPassword) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                if (!/^[0-9]{10}$/.test(phone)) {
+                    document.getElementById('signupPhoneError').textContent = 'Please enter a valid 10-digit phone number';
+                    document.getElementById('signupPhoneError').style.display = 'block';
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+
+                // Firebase Authentication
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Store additional user data in Firestore with role
+                        return db.collection('users').doc(userCredential.user.uid).set({
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            role: role,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    })
+                    .then(() => {
+                        console.log('Account created successfully!');
+                        alert('Account created successfully!');
+                        // Redirect to dashboard or home page
+                    })
+                    .catch((error) => {
+                        console.error('Signup error:', error);
+                        alert(error.message);
+                    });
+            });
+
+            // Real-time phone number validation
+            const signupPhone = document.getElementById('signupPhone');
+            const signupPhoneError = document.getElementById('signupPhoneError');
+
+            signupPhone.addEventListener('input', function () {
+                if (!/^[0-9]{0,10}$/.test(this.value)) {
+                    this.value = this.value.slice(0, 10);
+                }
+                if (this.value.length === 10) {
+                    signupPhoneError.style.display = 'none';
+                } else {
+                    signupPhoneError.style.display = 'block';
+                    signupPhoneError.textContent = 'Please enter a valid 10-digit phone number';
+                }
+            });
+
+            // Real-time password validation
+            const signupPassword = document.getElementById('signupPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+            confirmPassword.addEventListener('input', function () {
+                if (this.value !== signupPassword.value) {
+                    confirmPasswordError.style.display = 'block';
+                    confirmPasswordError.textContent = 'Passwords do not match';
+                } else {
+                    confirmPasswordError.style.display = 'none';
+                }
+            });
+
+            // Auth state observer
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    console.log('User is signed in:', user);
+                    // Redirect to dashboard or home page
+                } else {
+                    // User is signed out
+                    console.log('User is signed out');
+                }
+            });
+
+            // Add real-time role display for login form
+            document.getElementById('loginEmail').addEventListener('input', function() {
+                const email = this.value;
+                if (email.includes('@')) {
+                    const role = determineRole(email);
+                    document.getElementById('loginRole').value = role;
+                } else {
+                    document.getElementById('loginRole').value = '';
+                }
+            });
+
+            // Add real-time role display for signup form
+            document.getElementById('signupEmail').addEventListener('input', function() {
+                const email = this.value;
+                if (email.includes('@')) {
+                    const role = determineRole(email);
+                    document.getElementById('signupRole').value = role;
+                } else {
+                    document.getElementById('signupRole').value = '';
+                }
+            });
+
+            // Add password toggle functionality
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            });
+
+            // Add form transition animations
+            document.getElementById('showSignUp').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('.sign-in').style.opacity = '0';
+                setTimeout(() => {
+                    document.querySelector('.sign-in').style.display = 'none';
+                    document.querySelector('.sign-up').style.display = 'block';
+                    setTimeout(() => {
+                        document.querySelector('.sign-up').style.opacity = '1';
+                    }, 50);
+                }, 300);
+            });
+        });
+    </script>
+</body>
+
+</html>

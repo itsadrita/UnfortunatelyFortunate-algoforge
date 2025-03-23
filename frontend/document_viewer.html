@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Viewer - AI.Tech</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Ubuntu:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    
+    <style>
+        .custom-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 50px auto;
+            max-width: 900px;
+        }
+        
+        .file-item {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .file-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .project-btn {
+            margin-right: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+        
+        .section-title::after {
+            position: absolute;
+            content: "";
+            width: 50%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+    <div class="container-fluid sticky-top">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-dark p-0">
+                <a href="index.html" class="navbar-brand">
+                    <h1 class="text-white">AI<span class="text-dark">.</span>Tech</h1>
+                </a>
+                <button type="button" class="navbar-toggler ms-auto me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <div class="navbar-nav ms-auto">
+                        <a href="index.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About</a>
+                        <a href="service.html" class="nav-item nav-link">Services</a>
+                        <a href="project.html" class="nav-item nav-link">Projects</a>
+                        <a href="dashboard.html" class="nav-item nav-link">Dashboard</a>
+                        <a href="document_viewer.html" class="nav-item nav-link active">Documents</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+
+    <!-- Hero Start -->
+    <div class="container-fluid pt-5 bg-primary hero-header mb-5">
+        <div class="container pt-5">
+            <div class="row g-5 pt-5">
+                <div class="col-lg-6 align-self-center text-center text-lg-start mb-lg-5">
+                    <div class="btn btn-sm border rounded-pill text-white px-3 mb-3 animated slideInRight">Document Management</div>
+                    <h1 class="display-4 text-white mb-4 animated slideInRight">Project Document Viewer</h1>
+                    <p class="text-white mb-4 animated slideInRight">Access and manage your project documents securely from anywhere. Select a project to view your accessible documents.</p>
+                </div>
+                <div class="col-lg-6 align-self-end text-center text-lg-end">
+                    <img class="img-fluid" src="img/hero-img.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hero End -->
+
+    <!-- Document Viewer Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="custom-container">
+                <div class="row">
+                    <div class="col-12 text-center wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="section-title">
+                            <h1 class="display-6 mb-4">Document Viewer</h1>
+                        </div>
+                        <p class="mb-4">Select a project to view your accessible documents</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <button class="btn btn-primary py-2 px-4 project-btn rounded-pill" id="projectA">Project A</button>
+                        <button class="btn btn-primary py-2 px-4 project-btn rounded-pill" id="projectB">Project B</button>
+                        <button class="btn btn-success py-2 px-4 project-btn rounded-pill" id="doneBtn">Done</button>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success rounded-pill" id="successAlert" role="alert"></div>
+                <div class="alert alert-danger rounded-pill" id="errorAlert" role="alert"></div>
+                
+                <div class="file-list mt-4" id="fileList">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                        <p>Select a project to view documents...</p>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading documents...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Document Viewer End -->
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-white-50 footer pt-5">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.1s">
+                    <a href="index.html" class="d-inline-block mb-3">
+                        <h1 class="text-white">AI<span class="text-primary">.</span>Tech</h1>
+                    </a>
+                    <p class="mb-0">Access your project documents securely from anywhere. Select a project to view your accessible documents.</p>
+                </div>
+                <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.3s">
+                    <h5 class="text-white mb-4">Get In Touch</h5>
+                    <p><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
+                    <p><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                    <div class="d-flex pt-2">
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-instagram"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.5s">
+                    <h5 class="text-white mb-4">Popular Link</h5>
+                    <a class="btn btn-link" href="">About Us</a>
+                    <a class="btn btn-link" href="">Contact Us</a>
+                    <a class="btn btn-link" href="">Privacy Policy</a>
+                    <a class="btn btn-link" href="">Terms & Condition</a>
+                    <a class="btn btn-link" href="">Career</a>
+                </div>
+                <div class="col-md-6 col-lg-3 wow fadeIn" data-wow-delay="0.7s">
+                    <h5 class="text-white mb-4">Our Services</h5>
+                    <a class="btn btn-link" href="">Robotic Automation</a>
+                    <a class="btn btn-link" href="">Machine learning</a>
+                    <a class="btn btn-link" href="">Predictive Analysis</a>
+                    <a class="btn btn-link" href="">Data Science</a>
+                    <a class="btn btn-link" href="">Robot Technology</a>
+                </div>
+            </div>
+        </div>
+        <div class="container wow fadeIn" data-wow-delay="0.1s">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        &copy; <a class="border-bottom" href="#">AI.Tech</a>, All Right Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="footer-menu">
+                            <a href="">Home</a>
+                            <a href="">Cookies</a>
+                            <a href="">Help</a>
+                            <a href="">FAQs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top pt-2"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRfEEw2-zyeN91zli2y5MK4QjY4Om3o6A",
+            authDomain: "kjsitalgo.firebaseapp.com",
+            projectId: "kjsitalgo",
+            storageBucket: "gs://kjsitalgo",
+            messagingSenderId: "1003312299685",
+            appId: "1:1003312299685:web:ef7e8b416fc7628147174c",
+            measurementId: "G-CE7SDSSK7R"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Add this line to define the db variable
+        const db = firebase.firestore();
+
+        // Elements
+        const projectAButton = document.getElementById('projectA');
+        const projectBButton = document.getElementById('projectB');
+        const fileList = document.getElementById('fileList');
+        const loading = document.getElementById('loading');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const doneBtn = document.getElementById('doneBtn');
+
+        let currentProject = ''; // Store selected project
+
+        // Event listeners for project selection
+        projectAButton.addEventListener('click', () => selectProject('project-1/'));
+        projectBButton.addEventListener('click', () => selectProject('project-2/'));
+        doneBtn.addEventListener('click', () => {
+            window.location.href = 'chatpage.html';
+        });
+
+        function selectProject(project) {
+            currentProject = project;
+            fileList.innerHTML = `<div class="text-center"><p class="text-muted">Checking access for ${project.split('/')[0].toUpperCase()}...</p></div>`;
+            loadUserDocuments();
+        }
+
+        async function loadUserDocuments() {
+            if (!currentProject) return showError('Please select a project first.');
+            
+            const user = firebase.auth().currentUser;
+            if (!user || !user.email) {
+                showError('Please sign in with an email account to view documents.');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            try {
+                const projectId = currentProject.replace('/', ''); // Remove trailing slash
+                
+                // First, check if user has access to the project
+                const projectDoc = await db.collection('uploadedFiles').doc(projectId).get();
+                
+                if (!projectDoc.exists) {
+                    loading.style.display = 'none';
+                    fileList.innerHTML = `<div class="text-center p-4 bg-danger bg-opacity-10 rounded"><p class="text-danger mb-0">Project not found.</p></div>`;
+                    return;
+                }
+                
+                const projectData = projectDoc.data();
+                const files = projectData.files || {};
+                const filesList = Object.values(files);
+                
+                // Check if user has access to any files in the project
+                const accessibleFiles = filesList.filter(file => 
+                    file.accessEmails && file.accessEmails.includes(user.email)
+                );
+                
+                if (accessibleFiles.length === 0) {
+                    loading.style.display = 'none';
+                    fileList.innerHTML = `
+                        <div class="text-center p-4 bg-danger bg-opacity-10 rounded">
+                            <i class="fas fa-lock fa-3x mb-3 text-danger"></i>
+                            <h4 class="text-danger">Access Denied</h4>
+                            <p class="mb-0">You do not have access to any documents in ${projectData.projectTitle || projectId}.</p>
+                            <p class="mt-2 small">Please contact the project owner to request access.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display accessible files
+                fileList.innerHTML = `
+                    <div class="bg-light p-3 rounded mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-0">${projectData.projectTitle || projectId.charAt(0).toUpperCase() + projectId.slice(1).replace('-', ' ')}</h4>
+                                <p class="text-muted mb-0 small">${accessibleFiles.length} document${accessibleFiles.length !== 1 ? 's' : ''} available</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-folder-open fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Sort files by upload date (newest first)
+                accessibleFiles.sort((a, b) => {
+                    const dateA = a.uploadedAt ? a.uploadedAt.toDate() : new Date(0);
+                    const dateB = b.uploadedAt ? b.uploadedAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+                
+                accessibleFiles.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item wow fadeIn';
+                    fileItem.setAttribute('data-wow-delay', '0.1s');
+                    
+                    const uploadDate = file.uploadedAt ? new Date(file.uploadedAt.toDate()).toLocaleString() : 'Unknown date';
+                    const fileSize = formatFileSize(file.size || 0);
+                    
+                    fileItem.innerHTML = `
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">${file.name}</h5>
+                                        <div class="small text-muted">
+                                            <i class="far fa-clock me-1"></i> ${uploadDate}
+                                            <i class="fas fa-hdd ms-3 me-1"></i> ${fileSize}
+                                            <i class="fas fa-user ms-3 me-1"></i> ${file.uploaderEmail || 'Unknown'}
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            <i class="fas fa-folder me-1"></i> ${file.path || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <button class="btn btn-primary rounded-pill px-4 me-2" onclick="downloadDocument('${file.path}', '${file.name}')">
+                                    <i class="fas fa-download me-2"></i>Download
+                                </button>
+                                ${user.uid === file.uploadedBy ? 
+                                    `<button class="btn btn-danger rounded-pill px-4" onclick="deleteDocument('${projectId}', '${file.fileId}')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </button>` 
+                                    : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    fileList.appendChild(fileItem);
+                });
+                
+                loading.style.display = 'none';
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                showError(`Error loading documents: ${error.message}`);
+            }
+        }
+
+        // Add delete document function
+        async function deleteDocument(projectId, fileId) {
+            if (!confirm('Are you sure you want to delete this document?')) {
+                return;
+            }
+            
+            try {
+                loading.style.display = 'block';
+                const db = firebase.firestore();
+                
+                // Delete the file from the project
+                await db.collection('uploadedFiles').doc(projectId).update({
+                    [`files.${fileId}`]: firebase.firestore.FieldValue.delete()
+                });
+                
+                loading.style.display = 'none';
+                showSuccess('Document deleted successfully');
+                
+                // Reload the documents
+                loadUserDocuments();
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                showError(`Error deleting document: ${error.message}`);
+            }
+        }
+
+        // Update the downloadDocument function to handle the new path format
+        async function downloadDocument(storagePath, fileName) {
+            try {
+                // Extract the relative path from the full storage path
+                // Example: convert "gs://bucket-name/path/to/file" to "path/to/file"
+                const relativePath = storagePath.replace(/^gs:\/\/[^\/]+\//, '');
+                
+                const url = await firebase.storage().ref(relativePath).getDownloadURL();
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showSuccess(`Downloading ${fileName}`);
+            } catch (error) {
+                showError(`Error downloading: ${error.message}`);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + " Bytes";
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+            else return (bytes / 1048576).toFixed(2) + " MB";
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.style.display = 'block';
+            errorAlert.style.display = 'none';
+            setTimeout(() => { successAlert.style.display = 'none'; }, 5000);
+        }
+        
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+            successAlert.style.display = 'none';
+            setTimeout(() => { errorAlert.style.display = 'none'; }, 5000);
+        }
+        
+        // Initialize wow animation
+        new WOW().init();
+        
+        // Handle spinner
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('spinner').classList.remove('show');
+            }, 1000);
+        });
+
+        // Add role-based viewing permissions
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                const role = userData.role;
+
+                // Configure viewer based on role
+                const viewer = document.getElementById('document-viewer');
+                
+                switch(role) {
+                    case 'intern':
+                        // Text-only view
+                        viewer.classList.add('text-only-view');
+                        hideAnnotationTools();
+                        break;
+                    case 'project manager':
+                        // Full view with basic annotation
+                        viewer.classList.add('full-view');
+                        enableBasicAnnotation();
+                        break;
+                    case 'founder':
+                        // Full view with all features
+                        viewer.classList.add('full-view');
+                        enableAllFeatures();
+                        break;
+                }
+
+                // Add chat button
+                const chatButton = document.createElement('button');
+                chatButton.textContent = 'Open Chat';
+                chatButton.onclick = () => window.location.href = 'chatpage.html';
+                document.body.appendChild(chatButton);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

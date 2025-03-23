@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        svg {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .node {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 1px;
+        }
+        .node-label {
+            font-size: 12px;
+            pointer-events: none;
+        }
+        .relation-label {
+            font-size: 10px;
+            fill: #666;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Knowledge Graph: Projects, Teams, Employees, and Documents</h2>
+    <svg id="graph"></svg>
+    <div class="legend">
+        <!-- Legend will be added by JS -->
+    </div>
+
+    <script>
+        // Node type colors
+        const typeColors = {
+            "Project": "#ff7f0e",
+            "Team": "#2ca02c",
+            "Employee": "#1f77b4",
+            "Document": "#9467bd"
+        };
+
+        // Use the full URL path to ensure correct routing
+        fetch("http://127.0.0.1:5000/graph-data")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Graph data:", data);
+                
+                const width = document.getElementById('graph').clientWidth;
+                const height = 600;
+
+                const svg = d3.select("#graph")
+                              .attr("width", width)
+                              .attr("height", height);
+                
+                // Create legend
+                const legend = d3.select(".legend");
+                Object.entries(typeColors).forEach(([type, color]) => {
+                    const item = legend.append("div")
+                        .attr("class", "legend-item");
+                    
+                    item.append("div")
+                        .attr("class", "legend-color")
+                        .style("background-color", color);
+                    
+                    item.append("span")
+                        .text(type);
+                });
+
+                // Create a force simulation
+                const simulation = d3.forceSimulation(data.nodes)
+                    .force("link", d3.forceLink(data.edges)
+                        .id(d => d.id)
+                        .distance(150))
+                    .force("charge", d3.forceManyBody().strength(-500))
+                    .force("center", d3.forceCenter(width / 2, height / 2));
+
+                // Add links
+                const link = svg.append("g")
+                    .selectAll("line")
+                    .data(data.edges)
+                    .enter()
+                    .append("line")
+                    .attr("class", "link");
+
+                // Add relationship labels
+                const linkText = svg.append("g")
+                    .selectAll("text")
+                    .data(data.edges)
+                    .enter()
+                    .append("text")
+                    .attr("class", "relation-label")
+                    .text(d => d.relation);
+
+                // Add nodes with different colors based on type
+                const node = svg.append("g")
+                    .selectAll("circle")
+                    .data(data.nodes)
+                    .enter()
+                    .append("circle")
+                    .attr("class", "node")
+                    .attr("r", 12)
+                    .style("fill", d => typeColors[d.type] || "#999")
+                    .call(drag(simulation));
+
+                // Add labels for nodes
+                const labels = svg.append("g")
+                    .selectAll("text")
+                    .data(data.nodes)
+                    .enter()
+                    .append("text")
+                    .attr("class", "node-label")
+                    .attr("dy", -15)
+                    .attr("text-anchor", "middle")
+                    .text(d => d.id);
+
+                // Update positions on each tick
+                simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    linkText
+                        .attr("x", d => (d.source.x + d.target.x) / 2)
+                        .attr("y", d => (d.source.y + d.target.y) / 2);
+
+                    node
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
+
+                    labels
+                        .attr("x", d => d.x)
+                        .attr("y", d => d.y);
+                });
+
+                function drag(simulation) {
+                    function dragstarted(event, d) {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    }
+                    
+                    function dragged(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    }
+                    
+                    function dragended(event, d) {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    }
+                    
+                    return d3.drag()
+                        .on("start", dragstarted)
+                        .on("drag", dragged)
+                        .on("end", dragended);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching graph data:", error);
+                document.getElementById('graph').insertAdjacentHTML('afterend', 
+                    `<div style="color:red;margin-top:20px">Error loading graph: ${error.message}</div>`);
+            });
+    </script>
+</body>
+</html>
